@@ -30,6 +30,13 @@ public class Main {
             numbers.add(random.nextInt());
         }
 
+        for (int i = arraySize - 1; i > 0; i--) {
+            int j = random.nextInt(i + 1);
+            int temp = numbers.get(i);
+            numbers.set(i, numbers.get(j));
+            numbers.set(j, temp);
+        }
+
         // TODO: Call the generate_intervals method to generate the merge 
         // sequence
 
