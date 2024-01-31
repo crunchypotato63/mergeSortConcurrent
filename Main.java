@@ -1,13 +1,34 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.random.*;
 
 public class Main {
+
+    public static final long seed = 92;
     public static void main(String[] args) {
         // TODO: Seed your randomizer
 
+        Random random = new Random(seed);
+
         // TODO: Get array size and thread count from user
 
+        Scanner kb = new Scanner(System.in);
+        System.out.print("Array size: ");
+        int arraySize = kb.nextInt();
+        System.out.print("Thread count: ");
+        int numThreads = kb.nextInt();
+
+        kb.close();
+
         // TODO: Generate a random array of given size
+
+        ArrayList<Integer> numbers = new ArrayList<>();
+
+        for(int i = 0; i < arraySize; i++){
+            numbers.add(random.nextInt());
+        }
 
         // TODO: Call the generate_intervals method to generate the merge 
         // sequence
