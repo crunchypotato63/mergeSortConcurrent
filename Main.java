@@ -39,8 +39,14 @@ public class Main {
 
         // TODO: Call the generate_intervals method to generate the merge 
         // sequence
+        
+        List<Interval> mergeSequence = generate_intervals(0, arraySize - 1);
 
         // TODO: Call merge on each interval in sequence
+
+        for (Interval interval : mergeSequence) {
+            merge(numbers, interval.getStart(), interval.getEnd());
+        }
 
         // Once you get the single-threaded version to work, it's time to 
         // implement the concurrent version. Good luck :)
