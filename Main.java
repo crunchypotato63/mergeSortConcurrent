@@ -24,17 +24,17 @@ public class Main {
 
         // TODO: Generate a random array of given size
 
-        ArrayList<Integer> numbers = new ArrayList<>();
+        int numbers[] = new int[arraySize];
 
         for(int i = 0; i < arraySize; i++){
-            numbers.add(random.nextInt());
+            numbers[i] = i+1;
         }
 
         for (int i = arraySize - 1; i > 0; i--) {
             int j = random.nextInt(i + 1);
-            int temp = numbers.get(i);
-            numbers.set(i, numbers.get(j));
-            numbers.set(j, temp);
+            int temp = numbers[i];
+            numbers[i] = numbers[j];
+            numbers[j] = temp;
         }
 
         // TODO: Call the generate_intervals method to generate the merge 
