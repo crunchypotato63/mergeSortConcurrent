@@ -48,8 +48,13 @@ public class Main {
             merge(numbers, interval.getStart(), interval.getEnd());
         }
 
+        long startTime = System.currentTimeMillis();
+
         // Once you get the single-threaded version to work, it's time to 
         // implement the concurrent version. Good luck :)
+
+        long endstartTime = System.currentTimeMillis();
+        System.out.printf("Runtime: %d", endTime-startTime);
 
     }
 
