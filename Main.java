@@ -44,17 +44,22 @@ public class Main {
 
         // TODO: Call merge on each interval in sequence
 
+        long SinglestartTime = System.currentTimeMillis();
         for (Interval interval : mergeSequence) {
             merge(numbers, interval.getStart(), interval.getEnd());
         }
-
-        long startTime = System.currentTimeMillis();
+        long SingleendTime = System.currentTimeMillis();
+        System.out.println("Single-Threaded Runtime: %d", SingleendTime-SinglestartTime);
+        
 
         // Once you get the single-threaded version to work, it's time to 
         // implement the concurrent version. Good luck :)
+        
+        long ConcurrentstartTime = System.currentTimeMillis();
+        //concurrent code here
 
-        long endstartTime = System.currentTimeMillis();
-        System.out.printf("Runtime: %d", endTime-startTime);
+        long ConcurrentendTime = System.currentTimeMillis();
+        System.out.printf("Concurrent Runtime: %d", ConcurrentendTime-ConcurrentstartTime);
 
     }
 
