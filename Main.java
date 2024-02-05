@@ -1,10 +1,55 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.random.*;
 
 public class Main {
+
+    public static class worker extends Thread{
+        List<Interval> intervals;
+        int[] array;
+        int startIndex;
+        int endIndex;
+
+        public worker(List<Interval> intervals, int[] array, int start, int end){
+            this.intervals = intervals;
+            this.array = array;
+            this.startIndex = start;
+            this.endIndex = end;
+        }
+
+        @Override
+        public void run() {
+            //execute merge  for all
+            for (int i = startIndex; i < endIndex; i++) {    
+                // Check if there are dependencies
+                if (intervals.get(i).getDependencies() != null){
+                    //if there are, wait for dependencies to finish
+                    while (true){
+                        int[] depIndex = intervals.get(i).getDependencies();
+                        if (intervals.get(depIndex[0]).isCompleted() && intervals.get(depIndex[1]).isCompleted()){
+                            merge(array, intervals.get(i).getStart(), intervals.get(i).getEnd());
+                            intervals.get(i).complete();
+                            break;
+                        }
+
+                        try {
+                            Thread.sleep(1);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                //else, just do merge
+                } else {
+                    merge(array, intervals.get(i).getStart(), intervals.get(i).getEnd());
+                    intervals.get(i).complete();
+                }
+            }
+            //Sleep to avoid busy-waiting
+        }
+    }
 
     public static final long seed = 92;
     public static void main(String[] args) {
@@ -25,6 +70,7 @@ public class Main {
         // TODO: Generate a random array of given size
 
         int numbers[] = new int[arraySize];
+        int numbersConcurrent[] = new int[arraySize];
 
         for(int i = 0; i < arraySize; i++){
             numbers[i] = i+1;
@@ -37,28 +83,55 @@ public class Main {
             numbers[j] = temp;
         }
 
-        // TODO: Call the generate_intervals method to generate the merge 
-        // sequence
-        
+        numbersConcurrent = numbers;
+
+        System.out.println(Arrays.toString(numbers));
+        System.out.println(Arrays.toString(numbersConcurrent));
+        // TODO: Call the generate_intervals method to generate the merge sequence
         List<Interval> mergeSequence = generate_intervals(0, arraySize - 1);
+
+        mergeSequence.forEach(interval -> System.out.println(interval.getStart() + " - " + interval.getEnd()));
 
         // TODO: Call merge on each interval in sequence
 
         long SinglestartTime = System.currentTimeMillis();
         for (Interval interval : mergeSequence) {
+            System.out.println("Current Interval: " + interval.getStart() + "-" + interval.getEnd());
             merge(numbers, interval.getStart(), interval.getEnd());
         }
         long SingleendTime = System.currentTimeMillis();
-        System.out.println("Single-Threaded Runtime: %d", SingleendTime-SinglestartTime);
+        System.out.printf("Single-Threaded Runtime: %d%n", SingleendTime-SinglestartTime);
+        System.out.println(Arrays.toString(numbers));
         
 
         // Once you get the single-threaded version to work, it's time to 
         // implement the concurrent version. Good luck :)
-        
+
+        //get the interval per thread
+        int intervalsPerThread = mergeSequence.size() / numThreads;
+
+        //initialize threads
+        worker[] threads = new worker[numThreads];
+
         long ConcurrentstartTime = System.currentTimeMillis();
         //concurrent code here
+        for (int i = 0; i < numThreads; i++) {
+            int start = i * intervalsPerThread;
+            int end = (i == numThreads - 1) ? mergeSequence.size() : (i + 1) * intervalsPerThread;
+            System.out.println(start + " " + end);
+            threads[i] = new worker(mergeSequence, numbersConcurrent, start, end);
+            threads[i].start();
+        }
 
+        for (int i = 0; i < numThreads; i++) {
+            try {
+                threads[i].join(); 
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         long ConcurrentendTime = System.currentTimeMillis();
+        System.out.println(Arrays.toString(numbersConcurrent));
         System.out.printf("Concurrent Runtime: %d", ConcurrentendTime-ConcurrentstartTime);
 
     }
@@ -76,11 +149,17 @@ public class Main {
     public static List<Interval> generate_intervals(int start, int end) {
         List<Interval> frontier = new ArrayList<>();
         frontier.add(new Interval(start,end));
+        int endTemp = end+1;
 
         int i = 0;
         while(i < frontier.size()){
             int s = frontier.get(i).getStart();
             int e = frontier.get(i).getEnd();
+
+            if (i > end && s != e){
+                frontier.get(i).setDependencies(i-endTemp, i-(endTemp-1));
+                endTemp--;
+            }
 
             i++;
 
@@ -118,6 +197,7 @@ public class Main {
         int[] left = new int[m - s + 1];
         int[] right = new int[e - m];
         int l_ptr = 0, r_ptr = 0;
+
         for(int i = s; i <= e; i++) {
             if(i <= m) {
                 left[l_ptr++] = array[i];
@@ -125,6 +205,7 @@ public class Main {
                 right[r_ptr++] = array[i];
             }
         }
+        
         l_ptr = r_ptr = 0;
 
         for(int i = s; i <= e; i++) {
@@ -148,10 +229,15 @@ public class Main {
 class Interval {
     private int start;
     private int end;
+    private boolean completed;
+    private int[] dependencyIndices;
+    
 
     public Interval(int start, int end) {
         this.start = start;
         this.end = end;
+        this.completed = false;
+        
     }
 
     public int getStart() {
@@ -168,5 +254,23 @@ class Interval {
 
     public void setEnd(int end) {
         this.end = end;
+    }
+
+    public boolean isCompleted(){
+        return this.completed;
+    }
+
+    public void complete(){
+        this.completed = true;
+    }
+
+    public int[] getDependencies(){
+        return this.dependencyIndices;
+    }
+
+    public void setDependencies(int dependencyOne, int dependencyTwo){
+        this.dependencyIndices = new int[2];
+        this.dependencyIndices[0] = dependencyOne;
+        this.dependencyIndices[1] = dependencyTwo; 
     }
 }
