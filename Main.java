@@ -84,24 +84,18 @@ public class Main {
         }
 
         numbersConcurrent = numbers;
-
-        System.out.println(Arrays.toString(numbers));
-        System.out.println(Arrays.toString(numbersConcurrent));
         // TODO: Call the generate_intervals method to generate the merge sequence
         List<Interval> mergeSequence = generate_intervals(0, arraySize - 1);
 
-        mergeSequence.forEach(interval -> System.out.println(interval.getStart() + " - " + interval.getEnd()));
 
         // TODO: Call merge on each interval in sequence
 
         long SinglestartTime = System.currentTimeMillis();
         for (Interval interval : mergeSequence) {
-            System.out.println("Current Interval: " + interval.getStart() + "-" + interval.getEnd());
             merge(numbers, interval.getStart(), interval.getEnd());
         }
         long SingleendTime = System.currentTimeMillis();
         System.out.printf("Single-Threaded Runtime: %d%n", SingleendTime-SinglestartTime);
-        System.out.println(Arrays.toString(numbers));
         
 
         // Once you get the single-threaded version to work, it's time to 
@@ -118,7 +112,6 @@ public class Main {
         for (int i = 0; i < numThreads; i++) {
             int start = i * intervalsPerThread;
             int end = (i == numThreads - 1) ? mergeSequence.size() : (i + 1) * intervalsPerThread;
-            System.out.println(start + " " + end);
             threads[i] = new worker(mergeSequence, numbersConcurrent, start, end);
             threads[i].start();
         }
@@ -131,7 +124,6 @@ public class Main {
             }
         }
         long ConcurrentendTime = System.currentTimeMillis();
-        System.out.println(Arrays.toString(numbersConcurrent));
         System.out.printf("Concurrent Runtime: %d", ConcurrentendTime-ConcurrentstartTime);
 
     }
